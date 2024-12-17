@@ -1,17 +1,50 @@
-package main
+package snitchreceiver
 
 /*
-#include "../../otel_snitch/ext/otel_snitch/data.h"
+   #include "data.h"
 */
 import "C"
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"syscall"
 	"unsafe"
+
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/consumer"
+	"go.uber.org/zap"
 )
 
-func ReadFile(file string) {
+type Span struct {
+	Name                    [256]byte
+	TotalRecordedAttributes int32
+}
+
+type SnitchReceiver struct {
+	host         component.Host
+	cancel       context.CancelFunc
+	logger       *zap.Logger
+	nextConsumer consumer.Traces
+	config       *Config
+}
+
+func (snitchReceiver *SnitchReceiver) Start(ctx context.Context, host component.Host) error {
+	snitchReceiver.host = host
+	ctx, snitchReceiver.cancel = context.WithCancel(ctx)
+	go snitchReceiver.startHTTPServer(ctx)
+	return nil
+}
+
+func (snitchReceiver *SnitchReceiver) Shutdown(ctx context.Context) error {
+	if snitchReceiver.cancel != nil {
+		snitchReceiver.cancel()
+	}
+	return nil
+}
+
+func readFile(file string) {
 	f, err := os.Open(file)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -37,7 +70,6 @@ func ReadFile(file string) {
 		fmt.Printf("xxx i: %d, spanOffset: %d\n", i, spanOffset)
 
 		span := (*C.Span)(unsafe.Pointer(&mmap[spanOffset]))
-		fmt.Println("span is %v", span)
 		fmt.Printf("Span kind is %d\n", span.kind)
 		nameOffset := uintptr(span.name_offset)
 		name := C.GoString((*C.char)(unsafe.Pointer(&mmap[nameOffset])))
@@ -73,7 +105,6 @@ func ReadFile(file string) {
 				stringOffset := *(*C.size_t)(unsafe.Pointer(&value.value))
 				char := C.GoString((*C.char)(unsafe.Pointer(&mmap[stringOffset])))
 				fmt.Printf("attribute value: %s\n", char)
-				// fmt.Println(" xxxx Value type is STRING, offset= ", stringOffset)
 			case C.ANYVALUE_INT:
 				fmt.Println("Value type is INT ..............")
 			default:
@@ -88,6 +119,31 @@ func ReadFile(file string) {
 	}
 }
 
-func main() {
-	ReadFile("../../otel_snitch/test-file")
+func (snitchReceiver *SnitchReceiver) startHTTPServer(ctx context.Context) {
+	http.HandleFunc("/traces", func(w http.ResponseWriter, r *http.Request) {
+		file := r.URL.Query().Get("file")
+		if file == "" {
+			http.Error(w, "Missing 'file' parameter", http.StatusBadRequest)
+			return
+		}
+
+		snitchReceiver.logger.Info("Received a request for traces.", zap.String("file", file))
+		readFile(file)
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Traces received"))
+	})
+
+	server := &http.Server{Addr: ":8081"}
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			snitchReceiver.logger.Fatal("HTTP server ListenAndServe", zap.Error(err))
+		}
+	}()
+
+	<-ctx.Done()
+	if err := server.Shutdown(context.Background()); err != nil {
+		snitchReceiver.logger.Fatal("HTTP server Shutdown", zap.Error(err))
+	}
 }
