@@ -17,20 +17,9 @@ func createDefaultConfig() component.Config {
 }
 
 func createTracesReceiver(_ context.Context, params receiver.Settings, baseCfg component.Config, consumer consumer.Traces) (receiver.Traces, error) {
-
-	logger := params.Logger
-	tailtracerCfg := baseCfg.(*Config)
-
-	traceRcvr := &SnitchReceiver{
-		logger:       logger,
-		nextConsumer: consumer,
-		config:       tailtracerCfg,
-	}
-
-	return traceRcvr, nil
+	return nil, nil
 }
 
-// NewFactory creates a factory for tailtracer receiver.
 func NewFactory() receiver.Factory {
 	return receiver.NewFactory(
 		typeStr,
