@@ -26,4 +26,4 @@ providers:
   - gomod: go.opentelemetry.io/collector/confmap/provider/yamlprovider v1.18.0
 
 replaces:
-  - snitch-receiver/snitchreceiver => ../snitchreceiver
+  - snitch-receiver/snitchreceiver => ../snitch-receiver

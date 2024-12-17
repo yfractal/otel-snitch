@@ -5,7 +5,7 @@ require 'otel_snitch'
 require 'net/http'
 require 'uri'
 
-endpoint = ENV['OTEL_SNITCH_RECEIVER_ENDPOINT']
+endpoint = ENV['OTEL_SNITCH_RECEIVER_ENDPOINT'] || 'http://0.0.0.0:8081/traces'
 exporter = OtelSnitch::Exporter.new(endpoint)
 
 dir = ENV['OTEL_SNITCH_DIR']
