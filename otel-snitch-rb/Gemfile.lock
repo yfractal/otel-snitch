@@ -6,6 +6,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    byebug (11.1.3)
     diff-lcs (1.5.1)
     rake (13.2.1)
     rake-compiler (1.2.8)
@@ -29,6 +30,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  byebug
   otel_snitch!
   rake (~> 13.0)
   rake-compiler (~> 1.0)
