@@ -8,6 +8,8 @@ require 'uri'
 endpoint = ENV['OTEL_SNITCH_RECEIVER_ENDPOINT']
 exporter = OtelSnitch::Exporter.new(endpoint)
 
+dir = ENV['OTEL_SNITCH_DIR']
+
 File.open('data/spans.json') do |file|
   span_data = JSON.parse(file.read)
 
@@ -26,10 +28,13 @@ File.open('data/spans.json') do |file|
     otel_span
   end
 
+  spans *= 2
+  spans = spans[0...60]
+
   start_time = Time.now
   cpu_time0 = cpu_time
 
-  exporter.export(spans, './', 'abc')
+  exporter.export(spans, dir)
 
   cpu_time1 = cpu_time
   end_time = Time.now
