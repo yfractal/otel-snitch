@@ -5,7 +5,7 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-  tailtracer: # this line represents the ID of your receiver
+  snitchreceiver: # this line represents the ID of your receiver
     interval: 1m
     number_of_traces: 1
 
@@ -24,7 +24,7 @@ exporters:
 service:
   pipelines:
     traces:
-      receivers: [otlp, tailtracer]
+      receivers: [otlp, snitchreceiver]
       processors: [batch]
       exporters: [debug]
   telemetry:

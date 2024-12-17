@@ -14,7 +14,7 @@ import (
 	otlpexporter "go.opentelemetry.io/collector/exporter/otlpexporter"
 	batchprocessor "go.opentelemetry.io/collector/processor/batchprocessor"
 	otlpreceiver "go.opentelemetry.io/collector/receiver/otlpreceiver"
-	tailtracer "trace-receiver/tailtracer"
+	snitchreceiver "snitch-receiver/snitchreceiver"
 )
 
 func components() (otelcol.Factories, error) {
@@ -30,14 +30,14 @@ func components() (otelcol.Factories, error) {
 
 	factories.Receivers, err = receiver.MakeFactoryMap(
 		otlpreceiver.NewFactory(),
-		tailtracer.NewFactory(),
+		snitchreceiver.NewFactory(),
 	)
 	if err != nil {
 		return otelcol.Factories{}, err
 	}
 	factories.ReceiverModules = make(map[component.Type]string, len(factories.Receivers))
 	factories.ReceiverModules[otlpreceiver.NewFactory().Type()] = "go.opentelemetry.io/collector/receiver/otlpreceiver v0.115.0"
-	factories.ReceiverModules[tailtracer.NewFactory().Type()] = "trace-receiver/tailtracer v0.0.1"
+	factories.ReceiverModules[snitchreceiver.NewFactory().Type()] = "snitch-receiver/snitchreceiver v0.0.1"
 
 	factories.Exporters, err = exporter.MakeFactoryMap(
 		debugexporter.NewFactory(),

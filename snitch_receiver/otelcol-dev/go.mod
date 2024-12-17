@@ -25,7 +25,7 @@ require (
 	go.opentelemetry.io/collector/receiver v0.115.0
 	go.opentelemetry.io/collector/receiver/otlpreceiver v0.115.0
 	golang.org/x/sys v0.27.0
-	trace-receiver/tailtracer v0.0.1
+	snitch-receiver/snitchreceiver v0.0.1
 )
 
 require (
@@ -151,4 +151,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace trace-receiver/tailtracer => ../tailtracer
+replace snitch-receiver/snitchreceiver => ../snitchreceiver
