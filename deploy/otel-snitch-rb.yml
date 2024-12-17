@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-snitch-rb
+  namespace: default
+  labels:
+    app: otel-snitch-rb
+spec:
+  selector:
+    matchLabels:
+      app: otel-snitch-rb
+  template:
+    metadata:
+      labels:
+        app: otel-snitch-rb
+    spec:
+      volumes:
+        - name: dshm
+          hostPath:
+            path: /dev/shm
+            type: Directory
+      containers:
+        - name: otel-snitch-rb
+          image: otel-snitch:latest
+          command: ["/bin/sleep","infinity"]
+          imagePullPolicy: Never
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm

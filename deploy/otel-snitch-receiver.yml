@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: otel-snitch-receiver
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: otel-snitch-receiver
+  template:
+    metadata:
+      labels:
+        app: otel-snitch-receiver
+    spec:
+      volumes:
+        - name: dshm
+          hostPath:
+            path: /dev/shm
+            type: Directory
+      containers:
+      - name: example-container
+        image: snitch-receiver:latest
+        imagePullPolicy: Never
+        ports:
+          - containerPort: 8081
+          - containerPort: 4318
+        volumeMounts:
+          - name: dshm
+            mountPath: /dev/shm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-snitch-receiver-service
+  namespace: default
+spec:
+  selector:
+    app: otel-snitch-receiver
+  ports:
+    - name: snitch
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    - name: otle-http
+      protocol: TCP
+      port: 4318
+      targetPort: 4318
+  type: ClusterIP
