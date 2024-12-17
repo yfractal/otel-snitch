@@ -1,1 +1,3 @@
 otel-snitch-rb/.rspec_status
+otel-snitch-rb/tmp/
+otel-snitch-rb/lib/otel_snitch/otel_snitch.bundle
