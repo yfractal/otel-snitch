@@ -1,4 +1,4 @@
-package tailtracer
+package snitchreceiver
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -18,7 +17,7 @@ type Span struct {
 	TotalRecordedAttributes int32
 }
 
-type tailtracerReceiver struct {
+type SnitchReceiver struct {
 	host         component.Host
 	cancel       context.CancelFunc
 	logger       *zap.Logger
@@ -26,38 +25,21 @@ type tailtracerReceiver struct {
 	config       *Config
 }
 
-func (tailtracerRcvr *tailtracerReceiver) Start(ctx context.Context, host component.Host) error {
-	tailtracerRcvr.host = host
-	ctx = context.Background()
-	ctx, tailtracerRcvr.cancel = context.WithCancel(ctx)
-
-	interval, _ := time.ParseDuration(tailtracerRcvr.config.Interval)
-	go func() {
-		ticker := time.NewTicker(interval)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				tailtracerRcvr.logger.Info("I should start processing traces now!")
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-
-	go tailtracerRcvr.startHTTPServer(ctx)
+func (snitchReceiver *SnitchReceiver) Start(ctx context.Context, host component.Host) error {
+	snitchReceiver.host = host
+	ctx, snitchReceiver.cancel = context.WithCancel(ctx)
+	go snitchReceiver.startHTTPServer(ctx)
 	return nil
 }
 
-func (tailtracerRcvr *tailtracerReceiver) Shutdown(ctx context.Context) error {
-	if tailtracerRcvr.cancel != nil {
-		tailtracerRcvr.cancel()
+func (snitchReceiver *SnitchReceiver) Shutdown(ctx context.Context) error {
+	if snitchReceiver.cancel != nil {
+		snitchReceiver.cancel()
 	}
 	return nil
 }
 
-func (tailtracerRcvr *tailtracerReceiver) startHTTPServer(ctx context.Context) {
+func (snitchReceiver *SnitchReceiver) startHTTPServer(ctx context.Context) {
 	http.HandleFunc("/traces", func(w http.ResponseWriter, r *http.Request) {
 		file := r.URL.Query().Get("file")
 		if file == "" {
@@ -65,7 +47,7 @@ func (tailtracerRcvr *tailtracerReceiver) startHTTPServer(ctx context.Context) {
 			return
 		}
 
-		tailtracerRcvr.logger.Info("Received a request for traces.", zap.String("file", file))
+		snitchReceiver.logger.Info("Received a request for traces.", zap.String("file", file))
 
 		f, err := os.Open(file)
 		if err != nil {
@@ -74,7 +56,6 @@ func (tailtracerRcvr *tailtracerReceiver) startHTTPServer(ctx context.Context) {
 		}
 		defer f.Close()
 
-		// Read the file
 		for {
 			var span Span
 			err = binary.Read(f, binary.LittleEndian, &span)
@@ -82,7 +63,6 @@ func (tailtracerRcvr *tailtracerReceiver) startHTTPServer(ctx context.Context) {
 				break
 			}
 
-			// Convert the name to a string and trim the null bytes
 			name := string(span.Name[:])
 			fmt.Printf("Name: %s, Total Recorded Attributes: %d\n", name, span.TotalRecordedAttributes)
 		}
@@ -100,12 +80,12 @@ func (tailtracerRcvr *tailtracerReceiver) startHTTPServer(ctx context.Context) {
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			tailtracerRcvr.logger.Fatal("HTTP server ListenAndServe", zap.Error(err))
+			snitchReceiver.logger.Fatal("HTTP server ListenAndServe", zap.Error(err))
 		}
 	}()
 
 	<-ctx.Done()
 	if err := server.Shutdown(context.Background()); err != nil {
-		tailtracerRcvr.logger.Fatal("HTTP server Shutdown", zap.Error(err))
+		snitchReceiver.logger.Fatal("HTTP server Shutdown", zap.Error(err))
 	}
 }

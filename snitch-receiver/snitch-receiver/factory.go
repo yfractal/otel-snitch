@@ -1,8 +1,7 @@
-package tailtracer
+package snitchreceiver
 
 import (
 	"context"
-	"time"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
@@ -10,17 +9,11 @@ import (
 )
 
 var (
-	typeStr = component.MustNewType("tailtracer")
-)
-
-const (
-	defaultInterval = 1 * time.Minute
+	typeStr = component.MustNewType("snitchreceiver")
 )
 
 func createDefaultConfig() component.Config {
-	return &Config{
-		Interval: string(defaultInterval),
-	}
+	return &Config{}
 }
 
 func createTracesReceiver(_ context.Context, params receiver.Settings, baseCfg component.Config, consumer consumer.Traces) (receiver.Traces, error) {
@@ -28,7 +21,7 @@ func createTracesReceiver(_ context.Context, params receiver.Settings, baseCfg c
 	logger := params.Logger
 	tailtracerCfg := baseCfg.(*Config)
 
-	traceRcvr := &tailtracerReceiver{
+	traceRcvr := &SnitchReceiver{
 		logger:       logger,
 		nextConsumer: consumer,
 		config:       tailtracerCfg,

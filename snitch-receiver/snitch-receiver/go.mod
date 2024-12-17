@@ -1,4 +1,4 @@
-module trace-receiver/tailtracer
+module trace-receiver/snitchreceiver
 
 go 1.22.0
 
