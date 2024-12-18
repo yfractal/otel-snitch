@@ -2,9 +2,7 @@
 
 module go.opentelemetry.io/collector/cmd/builder
 
-go 1.22.0
-
-toolchain go1.22.2
+go 1.22.2
 
 require (
 	go.opentelemetry.io/collector/component v0.115.0

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	typeStr = component.MustNewType("snitchreceiver")
+	typeStr = component.MustNewType("snitch-receiver")
 )
 
 func createDefaultConfig() component.Config {
@@ -17,17 +17,7 @@ func createDefaultConfig() component.Config {
 }
 
 func createTracesReceiver(_ context.Context, params receiver.Settings, baseCfg component.Config, consumer consumer.Traces) (receiver.Traces, error) {
-
-	logger := params.Logger
-	cfg := baseCfg.(*Config)
-
-	traceRcvr := &SnitchReceiver{
-		logger:       logger,
-		nextConsumer: consumer,
-		config:       cfg,
-	}
-
-	return traceRcvr, nil
+	return nil, nil
 }
 
 func NewFactory() receiver.Factory {
