@@ -21,7 +21,7 @@ spec:
             type: Directory
       containers:
         - name: otel-snitch-rb
-          image: otel-snitch:latest
+          image: otel-snitch-rb:latest
           command: ["/bin/sleep","infinity"]
           imagePullPolicy: Never
           volumeMounts:

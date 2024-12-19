@@ -18,8 +18,8 @@ spec:
             path: /dev/shm
             type: Directory
       containers:
-      - name: example-container
-        image: snitch-receiver:latest
+      - name: otel-snitch-receiver-container
+        image: otel-snitch-receiver:latest
         imagePullPolicy: Never
         ports:
           - containerPort: 8081
@@ -31,7 +31,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: otel-snitch-receiver-service
+  name: otel-snitch-receiver
   namespace: default
 spec:
   selector:
