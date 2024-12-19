@@ -8,7 +8,7 @@ require 'uri'
 endpoint = ENV['OTEL_SNITCH_RECEIVER_ENDPOINT'] || 'http://0.0.0.0:8081/traces'
 exporter = OtelSnitch::Exporter.new(endpoint)
 
-dir = ENV['OTEL_SNITCH_DIR']
+dir = ENV['OTEL_SNITCH_DIR'] || './'
 
 File.open('data/spans.json') do |file|
   span_data = JSON.parse(file.read)

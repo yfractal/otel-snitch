@@ -7,7 +7,7 @@ require 'rake/extensiontask'
 RSpec::Core::RakeTask.new(:spec)
 
 Rake::ExtensionTask.new(:otel_snitch) do |ext|
-  ext.lib_dir = 'lib/otel-snitch'
+  ext.lib_dir = 'lib/otel_snitch'
 end
 
 task default: :compile
