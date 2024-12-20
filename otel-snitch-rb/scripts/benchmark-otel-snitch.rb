@@ -28,8 +28,9 @@ File.open('data/spans.json') do |file|
     otel_span
   end
 
-  spans *= 2
-  spans = spans[0...60]
+  spans *= 1000
+  # the default max_export_batch_size is 512
+  spans = spans[0...512]
 
   start_time = Time.now
   cpu_time0 = cpu_time
